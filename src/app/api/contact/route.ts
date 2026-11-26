@@ -6,6 +6,11 @@ import {
   formatContactEmailText,
   validateContactPayload,
 } from '@/lib/contact';
+import {
+  getClientIp,
+  pickTurnstileToken,
+  verifyTurnstileToken,
+} from '@/lib/turnstile';
 
 function getResendClient() {
   const key = process.env.RESEND_API_KEY?.trim();
@@ -23,6 +28,14 @@ export async function POST(request: Request) {
   const parsed = validateContactPayload(json);
   if (!parsed.ok) {
     return NextResponse.json({ error: parsed.message }, { status: 400 });
+  }
+
+  const turnstile = await verifyTurnstileToken(
+    pickTurnstileToken(json),
+    getClientIp(request)
+  );
+  if (!turnstile.ok) {
+    return NextResponse.json({ error: turnstile.message }, { status: 400 });
   }
 
   const { data } = parsed;

@@ -1,14 +1,19 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Mail, MapPin, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
 import { Container } from '@/components/ui/Container';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import {
+  TurnstileField,
+  isTurnstileConfigured,
+} from '@/components/ui/TurnstileField';
 
 const BOOKING_URL = '#'; // Configurable booking URL
+const turnstileEnabled = isTurnstileConfigured();
 
 const serviceOptions = [
   'AI Customer Support',
@@ -60,6 +65,8 @@ export function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const turnstileResetRef = useRef<(() => void) | null>(null);
 
   const validate = (): boolean => {
     const newErrors: FormErrors = {};
@@ -83,6 +90,11 @@ export function Contact() {
     e.preventDefault();
     if (!validate()) return;
 
+    if (turnstileEnabled && !turnstileToken) {
+      setSubmitError('Please complete the human verification check.');
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -90,7 +102,10 @@ export function Contact() {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          ...(turnstileToken ? { turnstileToken } : {}),
+        }),
       });
 
       const payload = (await res.json().catch(() => null)) as { error?: string } | null;
@@ -100,14 +115,19 @@ export function Contact() {
           payload?.error ??
             'Something went wrong. Please try again or email clickops.chat@gmail.com directly.'
         );
+        setTurnstileToken(null);
+        turnstileResetRef.current?.();
         return;
       }
 
       setIsSuccess(true);
+      setTurnstileToken(null);
     } catch {
       setSubmitError(
         'Network error. Please check your connection or email clickops.chat@gmail.com directly.'
       );
+      setTurnstileToken(null);
+      turnstileResetRef.current?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -221,6 +241,8 @@ export function Contact() {
                   onClick={() => {
                     setIsSuccess(false);
                     setSubmitError(null);
+                    setTurnstileToken(null);
+                    turnstileResetRef.current?.();
                     setFormData({
                       name: '',
                       email: '',
@@ -357,6 +379,20 @@ export function Contact() {
                     className={cn(inputClasses(errors.message), 'resize-none')}
                   />
                 </FormField>
+
+                {turnstileEnabled ? (
+                  <TurnstileField
+                    resetRef={turnstileResetRef}
+                    onToken={setTurnstileToken}
+                    onExpire={() => setTurnstileToken(null)}
+                    onError={() => {
+                      setTurnstileToken(null);
+                      setSubmitError(
+                        'Human verification failed to load. Please refresh and try again.'
+                      );
+                    }}
+                  />
+                ) : null}
 
                 {submitError ? (
                   <p
