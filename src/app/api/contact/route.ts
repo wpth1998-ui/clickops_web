@@ -7,7 +7,10 @@ import {
   validateContactPayload,
 } from '@/lib/contact';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+function getResendClient() {
+  const key = process.env.RESEND_API_KEY?.trim();
+  return key ? new Resend(key) : null;
+}
 
 export async function POST(request: Request) {
   let json: unknown;
@@ -27,6 +30,7 @@ export async function POST(request: Request) {
   const from =
     process.env.RESEND_FROM_EMAIL?.trim() || 'ClickOps Website <onboarding@resend.dev>';
 
+  const resend = getResendClient();
   if (!resend) {
     console.error('[contact] RESEND_API_KEY is not set');
     return NextResponse.json(
