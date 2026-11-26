@@ -1,26 +1,441 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  Typography: Plus Jakarta Sans site-wide (Myanmar text falls back via system-ui).
+  ClickOps section backgrounds (pick one pattern and stick to it):
+  - surface (#ffffff)     → default content sections
+  - surface-secondary (#f8fafc) → soft gray band (Process, FAQ, every 2nd block)
+  - surface-muted (#f1f5f9)   → slightly stronger band (optional: CTA, mockup frames only)
+
+  Avoid: bright blue fills, cream/beige, or full-width accent colors on sections.
+*/
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #ffffff;
+  --color-foreground: #26251e;
+
+  /* CTA buttons — muted navy (Tailwind needs short single names) */
+  --color-cta: #2e4a73;
+  --color-cta-hover: #243d5f;
+  --color-on-cta: #ffffff;
+  /* Links, icons, chart accents */
+  --color-brand-blue: #3d5f94;
+  --color-brand-blue-hover: #2e4a73;
+  --color-brand-blue-light: #eef1f6;
+
+  /* cursor.com theme text */
+  --color-text-primary: #26251e;
+  --color-text-secondary: #26251e99;
+  --color-text-muted: #26251e80;
+  --color-text-tertiary: #26251e66;
+  --color-surface: #ffffff;
+  --color-surface-secondary: #f8fafc;
+  --color-surface-muted: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-footer-bg: #f2f1ed;
+  --color-footer-heading: #26251e;
+  --color-footer-text: #26251e99;
+  --color-footer-border: #26251e14;
+  --color-terminal-bg: #1c1c1a;
+  --color-terminal-text: #f7f7f4a3;
+
+  --font-sans: var(--font-clickops), system-ui, "Helvetica Neue", Helvetica, Arial,
+    sans-serif;
+  --font-display: var(--font-sans);
+  --font-mono: var(--font-sans);
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md-sm: 1.125rem;
+  --text-md: 1.375rem;
+  --text-md-lg: 1.625rem;
+  --text-lg: 2.25rem;
+  --text-xl: 3.25rem;
+  --text-2xl: 4.5rem;
+
+  --leading-normal: 1.5;
+  --leading-cozy: 1.4;
+  --leading-snug: 1.25;
+  --leading-snug-plus: 1.3;
+  --leading-xsnug: 1.2;
+  --leading-2xsnug: 1.15;
+  --leading-tight: 1.1;
+
+  --tracking-sm: 0.01em;
+  --tracking-base: 0.005em;
+  --tracking-md: -0.005em;
+  --tracking-md-lg: -0.0125em;
+  --tracking-lg: -0.02em;
+  --tracking-xl: -0.025em;
+  --tracking-2xl: -0.03em;
+
+  --shadow-soft: 0 16px 40px -14px rgba(15, 23, 42, 0.1),
+    0 6px 16px -8px rgba(15, 23, 42, 0.06);
+
+  --motion-micro: 180ms;
+  --motion-enter: 500ms;
+  --motion-hero-stagger: 80ms;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  overflow-x: hidden;
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-display,
+.font-mono {
+  font-family: var(--font-sans);
+}
+
+.motion-micro {
+  transition-duration: var(--motion-micro);
+}
+
+.interactive-lift {
+  transition:
+    transform var(--motion-micro) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow var(--motion-micro) cubic-bezier(0.22, 1, 0.36, 1),
+    border-color var(--motion-micro) ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .interactive-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+    border-color: color-mix(in srgb, var(--color-brand-blue) 28%, var(--color-border));
+  }
+}
+
+.btn-nudge svg:last-child {
+  transition: transform var(--motion-micro) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-nudge:hover svg:last-child {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes hero-nav-in {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-nav-icon {
+  animation: hero-nav-in var(--motion-enter) both;
+}
+
+/* cursor.com type scale */
+.type-xs {
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  letter-spacing: var(--tracking-sm);
+}
+
+.type-sm {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  letter-spacing: var(--tracking-sm);
+}
+
+.type-base {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  letter-spacing: var(--tracking-base);
+}
+
+.type-base-bold {
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  font-weight: 700;
+  letter-spacing: var(--tracking-base);
+}
+
+.type-md-sm {
+  font-size: var(--text-md-sm);
+  line-height: var(--leading-cozy);
+  font-weight: 400;
+}
+
+.type-md {
+  font-size: var(--text-md);
+  line-height: var(--leading-snug-plus);
+  font-weight: 400;
+  letter-spacing: var(--tracking-md);
+}
+
+.type-md-lg {
+  font-size: var(--text-md-lg);
+  line-height: var(--leading-snug);
+  font-weight: 400;
+  letter-spacing: var(--tracking-md-lg);
+}
+
+.type-lg {
+  font-size: var(--text-lg);
+  line-height: var(--leading-xsnug);
+  font-weight: 400;
+  letter-spacing: var(--tracking-lg);
+}
+
+.type-xl {
+  font-size: var(--text-xl);
+  line-height: var(--leading-2xsnug);
+  font-weight: 400;
+  letter-spacing: var(--tracking-xl);
+}
+
+.type-2xl {
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  font-weight: 400;
+  letter-spacing: var(--tracking-2xl);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+.text-theme-text {
+  color: var(--color-text-primary);
+}
+
+.text-theme-text-sec {
+  color: var(--color-text-secondary);
+}
+
+.text-theme-text-mid {
+  color: var(--color-text-muted);
+}
+
+/* cursor.com nav__btn + footer-link (Cursor Gothic: use 400/700 only — no synthetic 500) */
+.site-chrome-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #26251e;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 6px 10px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #26251e;
+  transition: color 0.2s ease;
+}
+
+.nav-btn:hover {
+  color: #26251e;
+}
+
+.footer-link {
+  display: inline-block;
+  padding: 3px 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: #26251e;
+}
+
+.footer-heading {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #26251e;
+  margin-bottom: 0.35rem;
+}
+
+/* Marketing copy — cursor.com secondary paragraphs (type-sm + text-sec) */
+.copy {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  letter-spacing: var(--tracking-sm);
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+/* Legacy aliases → Cursor sizes */
+.text-hero {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug-plus);
+  font-weight: 600;
+  letter-spacing: var(--tracking-base);
+  text-wrap: balance;
+}
+
+@media (min-width: 640px) {
+  .text-hero {
+    font-size: var(--text-lg);
+    line-height: var(--leading-xsnug);
+    letter-spacing: var(--tracking-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .text-hero {
+    font-size: var(--text-xl);
+    line-height: var(--leading-2xsnug);
+    letter-spacing: var(--tracking-lg);
+  }
+}
+
+.text-display {
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--leading-snug-plus);
+  font-weight: 400;
+  letter-spacing: var(--tracking-md);
+}
+
+@media (min-width: 640px) {
+  .text-display {
+    font-size: var(--text-xl);
+    line-height: var(--leading-2xsnug);
+    letter-spacing: var(--tracking-xl);
+  }
+}
+
+.text-section-heading {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+  line-height: var(--leading-xsnug);
+  font-weight: 400;
+  letter-spacing: var(--tracking-lg);
+  text-wrap: balance;
+}
+
+@media (min-width: 640px) {
+  .text-section-heading {
+    font-size: var(--text-2xl);
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-2xl);
+  }
+}
+
+.text-card-heading {
+  font-size: var(--text-md-sm);
+  line-height: var(--leading-cozy);
+  font-weight: 400;
+  letter-spacing: var(--tracking-base);
+}
+
+.text-body,
+.text-body-lg {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  font-weight: 400;
+  letter-spacing: var(--tracking-sm);
+  color: var(--color-text-secondary);
+  text-wrap: pretty;
+}
+
+.text-eyebrow {
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  letter-spacing: var(--tracking-sm);
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+::selection {
+  background-color: var(--color-brand-blue);
+  color: white;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .interactive-lift:hover,
+  .btn-nudge:hover svg:last-child,
+  .hero-nav-icon {
+    transform: none !important;
+    animation: none !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
 }
